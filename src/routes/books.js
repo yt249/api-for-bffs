@@ -4,11 +4,8 @@ const db = require('../models/db');
 
 // Function to validate price format
 const isValidPrice = (price) => {
-  if (typeof price !== 'number' || isNaN(price) || price <= 0) {
-    return false;
-  }
-  // Convert to string and check for exactly two decimal places
-  return /^\d+\.\d{2}$/.test(price.toFixed(2));
+  const priceStr = typeof price === 'number' ? price.toString() : price;
+  return /^(\d+)\.(\d{2})$/.test(priceStr) && parseFloat(priceStr) > 0;
 };
 
 // Add a book
