@@ -2,6 +2,63 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
 
+// Validate email format
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// Validate state abbreviation
+const validStates = new Set([
+  'AL',
+  'AK',
+  'AZ',
+  'AR',
+  'CA',
+  'CO',
+  'CT',
+  'DE',
+  'FL',
+  'GA',
+  'HI',
+  'ID',
+  'IL',
+  'IN',
+  'IA',
+  'KS',
+  'KY',
+  'LA',
+  'ME',
+  'MD',
+  'MA',
+  'MI',
+  'MN',
+  'MS',
+  'MO',
+  'MT',
+  'NE',
+  'NV',
+  'NH',
+  'NJ',
+  'NM',
+  'NY',
+  'NC',
+  'ND',
+  'OH',
+  'OK',
+  'OR',
+  'PA',
+  'RI',
+  'SC',
+  'SD',
+  'TN',
+  'TX',
+  'UT',
+  'VT',
+  'VA',
+  'WA',
+  'WV',
+  'WI',
+  'WY',
+]);
+
 // Add customer
 router.post('/', async (req, res) => {
   const { userId, name, phone, address, address2, city, state, zipcode } =
@@ -11,6 +68,14 @@ router.post('/', async (req, res) => {
     return res
       .status(400)
       .json({ message: 'All required fields must be provided' });
+  }
+
+  if (!isValidEmail(userId)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+
+  if (!validStates.has(state)) {
+    return res.status(400).json({ message: 'Invalid US state abbreviation' });
   }
 
   try {
@@ -45,7 +110,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ✅ Retrieve customer by ID
+// Retrieve customer by ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -66,12 +131,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ✅ Retrieve customer by user ID
+// Retrieve customer by user ID
 router.get('/', async (req, res) => {
   const { userId } = req.query;
 
-  if (!userId) {
-    return res.status(400).json({ message: 'Missing userId query parameter' });
+  if (!userId || !isValidEmail(userId)) {
+    return res.status(400).json({ message: 'Invalid email format' });
   }
 
   try {
