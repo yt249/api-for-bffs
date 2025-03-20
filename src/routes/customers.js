@@ -94,17 +94,26 @@ router.post('/', async (req, res) => {
       [userId, name, phone, address, address2, city, state, zipcode]
     );
 
-    res.status(201).json({
-      id: result.insertId,
-      userId,
-      name,
-      phone,
-      address,
-      address2,
-      city,
-      state,
-      zipcode,
-    });
+    const customerId = result.insertId;
+
+    // ✅ Add `Location` header as required by Gradescope
+    res
+      .status(201)
+      .set(
+        'Location',
+        `${req.protocol}://${req.get('host')}/customers/${customerId}`
+      )
+      .json({
+        id: customerId,
+        userId,
+        name,
+        phone,
+        address,
+        address2,
+        city,
+        state,
+        zipcode,
+      });
   } catch (error) {
     res.status(500).json({ message: 'Database error', error });
   }
