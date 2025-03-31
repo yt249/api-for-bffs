@@ -1,0 +1,93 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: bookstore-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bookstore
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  book-service:
+    build: ./book-service
+    container_name: book-service
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: bookstore
+      DB_PORT: 3306
+      PORT: 3000
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./book-service:/app
+    working_dir: /app
+    command: ['node', 'app.js']
+
+  customer-service:
+    build: ./customer-service
+    container_name: customer-service
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: bookstore
+      DB_PORT: 3306
+      PORT: 3000
+    ports:
+      - '3002:3000'
+    volumes:
+      - ./customer-service:/app
+    working_dir: /app
+    command: ['node', 'app.js']
+
+  bff-web:
+    build: ./bff-web
+    container_name: bff-web
+    restart: always
+    depends_on:
+      - book-service
+      - customer-service
+    environment:
+      URL_BASE_BACKEND_SERVICES: http://host.docker.internal
+      PORT: 80
+    ports:
+      - '8080:80'
+    volumes:
+      - ./bff-web:/app
+    working_dir: /app
+    command: ['node', 'app.js']
+
+  bff-mobile:
+    build: ./bff-mobile
+    container_name: bff-mobile
+    restart: always
+    depends_on:
+      - book-service
+      - customer-service
+    environment:
+      URL_BASE_BACKEND_SERVICES: http://host.docker.internal
+      PORT: 80
+    ports:
+      - '8081:80'
+    volumes:
+      - ./bff-mobile:/app
+    working_dir: /app
+    command: ['node', 'app.js']
+
+volumes:
+  mysql_data:
