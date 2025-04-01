@@ -7,8 +7,12 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 80;
-const BASE_URL =
-  process.env.URL_BASE_BACKEND_SERVICES || 'http://localhost:3001'; // fallback for local testing
+
+const BOOK_SERVICE_URL =
+  process.env.BOOK_SERVICE_URL || 'http://localhost:3001';
+
+const CUSTOMER_SERVICE_URL =
+  process.env.CUSTOMER_SERVICE_URL || 'http://localhost:3002';
 
 const allowedClientTypes = ['Web'];
 
@@ -16,7 +20,7 @@ const allowedClientTypes = ['Web'];
 function validateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith('Bearer')) {
     return res
       .status(401)
       .json({ message: 'Missing or invalid Authorization header' });
@@ -51,6 +55,11 @@ function validateJWT(req, res, next) {
   }
 }
 
+app.use((req, res, next) => {
+  console.log('Request headers:', req.headers); // 👈 ADD THIS
+  next();
+});
+
 // 📦 Validate X-Client-Type header
 app.use((req, res, next) => {
   const clientType = req.headers['x-client-type'];
@@ -68,12 +77,13 @@ app.use('/books', validateJWT, async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
-      url: `${BASE_URL}/books${req.url}`,
+      url: `${BOOK_SERVICE_URL}/books${req.url}`,
       data: req.body,
     });
 
     res.status(response.status).json(response.data);
   } catch (err) {
+    console.error('Forwarding error:', err.message);
     const status = err.response?.status || 500;
     const message = err.response?.data || {
       message: 'Error forwarding /books request',
@@ -87,12 +97,13 @@ app.use('/customers', validateJWT, async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
-      url: `${BASE_URL}/customers${req.url}`,
+      url: `${CUSTOMER_SERVICE_URL}/customers${req.url}`,
       data: req.body,
     });
 
     res.status(response.status).json(response.data);
   } catch (err) {
+    console.error('Forwarding error:', err.message);
     const status = err.response?.status || 500;
     const message = err.response?.data || {
       message: 'Error forwarding /customers request',
