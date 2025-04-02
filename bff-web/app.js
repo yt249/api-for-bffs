@@ -85,11 +85,15 @@ app.use('/books', async (req, res) => {
 
     res.set(response.headers).status(response.status).json(response.data);
   } catch (err) {
-    const status = err?.response?.status || 500;
-    const message =
-      err?.response?.data?.message || 'Proxy error to book service';
-
-    res.status(status).json({ message });
+    if (err.response) {
+      res.status(err.response.status).json(err.response.data);
+    } else if (err.request) {
+      res
+        .status(504)
+        .json({ message: 'Backend did not respond (socket hang up)' });
+    } else {
+      res.status(500).json({ message: 'Unexpected error in BFF' });
+    }
   }
 });
 
