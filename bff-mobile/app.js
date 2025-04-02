@@ -70,12 +70,14 @@ app.use((req, res, next) => {
 });
 
 // 📚 Forward and transform /books responses
-app.use('/books', validateJWT, async (req, res) => {
+app.use('/books', async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
       url: `${BOOK_SERVICE_URL}/books${req.url}`,
-      data: req.body,
+      headers: req.headers, // ✅ include auth + any custom headers
+      params: req.query, // ✅ preserve query string
+      data: req.body, // ✅ body for POST/PUT
     });
 
     let data = response.data;
@@ -89,23 +91,24 @@ app.use('/books', validateJWT, async (req, res) => {
       data.genre = 3;
     }
 
-    res.status(response.status).json(data);
+    res.set(response.headers).status(response.status).json(data);
   } catch (err) {
-    console.error('Forwarding error:', err.message);
-    const status = err.response?.status || 500;
-    const message = err.response?.data || {
-      message: 'Error forwarding /books request',
-    };
-    res.status(status).json(message);
+    const status = err?.response?.status || 500;
+    const message =
+      err?.response?.data?.message || 'Proxy error to book service';
+
+    res.status(status).json({ message });
   }
 });
 
 // 👤 Forward and transform /customers responses
-app.use('/customers', validateJWT, async (req, res) => {
+app.use('/customers', async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
       url: `${CUSTOMER_SERVICE_URL}/customers${req.url}`,
+      headers: req.headers, // ✅ include auth + any custom headers
+      params: req.query, // ✅ preserve query string
       data: req.body,
     });
 
@@ -120,14 +123,14 @@ app.use('/customers', validateJWT, async (req, res) => {
       delete data.zipcode;
     }
 
-    res.status(response.status).json(data);
+    res.set(response.headers).status(response.status).json(data);
   } catch (err) {
     console.error('Forwarding error:', err.message);
     const status = err.response?.status || 500;
     const message = err.response?.data || {
       message: 'Error forwarding /customers request',
     };
-    res.status(status).json(message);
+    res.status(status).json({ message });
   }
 });
 
