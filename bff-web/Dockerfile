@@ -9,6 +9,7 @@ RUN npm install
 
 # Copy source code
 COPY . .
+COPY web.env .env
 
 # Expose port 80 for BFF
 EXPOSE 80

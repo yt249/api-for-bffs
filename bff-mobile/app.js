@@ -127,13 +127,19 @@ app.use('/customers', async (req, res) => {
     }
 
     res.set(response.headers).status(response.status).json(data);
-  } catch (err) {
-    console.error('Forwarding error:', err.message);
-    const status = err.response?.status || 500;
-    const message = err.response?.data || {
-      message: 'Error forwarding /customers request',
-    };
-    res.status(status).json({ message });
+  } catch (error) {
+    console.error('Forwarding error:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else if (error.request) {
+      res
+        .status(504)
+        .json({
+          message: 'Backend did not respond (timeout or socket hang up)',
+        });
+    } else {
+      res.status(500).json({ message: 'Unexpected error in BFF' });
+    }
   }
 });
 
