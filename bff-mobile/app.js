@@ -14,7 +14,7 @@ const BOOK_SERVICE_URL =
 const CUSTOMER_SERVICE_URL =
   process.env.CUSTOMER_SERVICE_URL || 'http://localhost:3002';
 
-const allowedClientTypes = ['iOS', 'Android'];
+const allowedClientTypes = ['iOS', 'Android', 'ios', 'android'];
 
 // 🔐 JWT validation middleware
 function validateJWT(req, res, next) {
@@ -78,8 +78,8 @@ app.use('/books', async (req, res) => {
     const response = await axios({
       method: req.method,
       url: `${BOOK_SERVICE_URL}/books${req.url}`,
-      headers: req.headers, // ✅ include auth + any custom headers
-      params: req.query, // ✅ preserve query string
+      //   headers: req.headers, // ✅ include auth + any custom headers
+      //   params: req.query, // ✅ preserve query string
       data: req.body, // ✅ body for POST/PUT
     });
 
@@ -94,7 +94,7 @@ app.use('/books', async (req, res) => {
       data.genre = 3;
     }
 
-    res.set(response.headers).status(response.status).json(data);
+    res.status(response.status).json(response.data);
   } catch (err) {
     if (err.response) {
       res.status(err.response.status).json(err.response.data);
@@ -114,8 +114,8 @@ app.use('/customers', async (req, res) => {
     const response = await axios({
       method: req.method,
       url: `${CUSTOMER_SERVICE_URL}/customers${req.url}`,
-      headers: req.headers, // ✅ include auth + any custom headers
-      params: req.query, // ✅ preserve query string
+      //   headers: req.headers, // ✅ include auth + any custom headers
+      //   params: req.query, // ✅ preserve query string
       data: req.body,
     });
 
@@ -130,7 +130,7 @@ app.use('/customers', async (req, res) => {
       delete data.zipcode;
     }
 
-    res.set(response.headers).status(response.status).json(data);
+    res.status(response.status).json(response.data);
   } catch (error) {
     console.error('Forwarding error:', error.message);
     if (error.response) {

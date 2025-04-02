@@ -4,15 +4,17 @@ services:
     container_name: bookstore-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: adminadmin
       MYSQL_DATABASE: bookstore
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpassword
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminadmin
     ports:
       - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
       - ./sql-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ./book-service/book-service.env
 
   book-service:
     build:
@@ -21,6 +23,8 @@ services:
       - db
     ports:
       - '3001:3000'
+    env_file:
+      - ./book-service/book-service.env
 
   customer-service:
     build:
@@ -29,6 +33,8 @@ services:
       - db
     ports:
       - '3002:3000'
+    env_file:
+      - ./customer-service/customer-service.env
 
   bff-web:
     build:
@@ -38,6 +44,8 @@ services:
       - customer-service
     ports:
       - '3003:80'
+    env_file:
+      - ./bff-web/web.env
 
   bff-mobile:
     build:
@@ -47,6 +55,8 @@ services:
       - customer-service
     ports:
       - '3004:80'
+    env_file:
+      - ./bff-mobile/mobile.env
 
 volumes:
   mysql_data:

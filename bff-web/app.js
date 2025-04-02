@@ -14,7 +14,7 @@ const BOOK_SERVICE_URL =
 const CUSTOMER_SERVICE_URL =
   process.env.CUSTOMER_SERVICE_URL || 'http://localhost:3002';
 
-const allowedClientTypes = ['Web'];
+const allowedClientTypes = ['Web', 'web'];
 
 // 🔐 JWT validation middleware
 function validateJWT(req, res, next) {
@@ -75,18 +75,23 @@ app.use((req, res, next) => {
 // 🔀 Proxy to /books endpoint (no mobile logic)
 app.use('/books', async (req, res) => {
   try {
+    console.log('Forwarding POST /books with body:', req.body);
+
     const response = await axios({
       method: req.method,
       url: `${BOOK_SERVICE_URL}/books${req.url}`,
-      headers: req.headers, // ✅ include auth + any custom headers
-      params: req.query, // ✅ preserve query string
+      //   headers: req.headers, // ✅ include auth + any custom headers
       data: req.body, // ✅ body for POST/PUT
     });
+
+    console.log('Response from book-service:', response.data);
 
     res.set(response.headers).status(response.status).json(response.data);
   } catch (err) {
     if (err.response) {
-      res.status(err.response.status).json(err.response.data);
+      console.error('BFF error:', err.message);
+
+      res.status(response.status).json(response.data);
     } else if (err.request) {
       res
         .status(504)
@@ -103,12 +108,16 @@ app.use('/customers', async (req, res) => {
     const response = await axios({
       method: req.method,
       url: `${CUSTOMER_SERVICE_URL}/customers${req.url}`,
-      headers: req.headers, // ✅ include auth + any custom headers
-      params: req.query, // ✅ preserve query string
+      //   headers: req.headers, // ✅ include auth + any custom headers
+      //   params: req.query, // ✅ preserve query string
       data: req.body,
     });
-
-    res.set(response.headers).status(response.status).json(response.data);
+    console.log(
+      'Response from customer-service:',
+      response.status,
+      response.data
+    );
+    res.status(response.status).json(response.data);
   } catch (error) {
     console.error('Forwarding error:', error.message);
     if (error.response) {
