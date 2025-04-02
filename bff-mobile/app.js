@@ -55,6 +55,8 @@ function validateJWT(req, res, next) {
   }
 }
 
+// 🥇 FIRST: validate the JWT
+app.use(validateJWT);
 // 📦 Validate X-Client-Type header
 app.use((req, res, next) => {
   const clientType = req.headers['x-client-type'];
