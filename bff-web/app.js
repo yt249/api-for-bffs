@@ -55,6 +55,9 @@ function validateJWT(req, res, next) {
   }
 }
 
+// ✅ Health check
+app.get('/status', (req, res) => res.status(200).send('OK'));
+
 // 🥇 FIRST: validate the JWT
 app.use(validateJWT);
 // 📦 Validate X-Client-Type header
@@ -111,9 +114,6 @@ app.use('/customers', async (req, res) => {
     res.status(status).json({ message });
   }
 });
-
-// ✅ Health check
-app.get('/status', (req, res) => res.status(200).send('OK'));
 
 app.listen(PORT, () => {
   console.log(`bff-web listening on port ${PORT}`);
