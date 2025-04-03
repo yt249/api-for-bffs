@@ -91,7 +91,7 @@ app.use('/books', async (req, res) => {
     if (err.response) {
       console.error('BFF error:', err.message);
 
-      res.status(response.status).json(response.data);
+      res.status(err.response.status).json(err.response.data);
     } else if (err.request) {
       res
         .status(504)
