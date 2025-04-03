@@ -29,7 +29,7 @@ function validateJWT(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.decode(token);
+    const decoded = jwt.verify(token, 'secret');
     if (
       !decoded.sub ||
       !['starlord', 'gamora', 'drax', 'rocket', 'groot'].includes(decoded.sub)
@@ -74,6 +74,7 @@ app.use((req, res, next) => {
 
 // 📚 Forward and transform /books responses
 app.use('/books', async (req, res) => {
+  console.log('mobile-books' + req);
   try {
     const response = await axios({
       method: req.method,
@@ -110,6 +111,7 @@ app.use('/books', async (req, res) => {
 
 // 👤 Forward and transform /customers responses
 app.use('/customers', async (req, res) => {
+  console.log('mobile-customers' + req);
   try {
     const response = await axios({
       method: req.method,

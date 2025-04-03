@@ -29,7 +29,7 @@ function validateJWT(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.decode(token);
+    const decoded = jwt.verify(token, 'secret');
     if (
       !decoded.sub ||
       !['starlord', 'gamora', 'drax', 'rocket', 'groot'].includes(decoded.sub)
