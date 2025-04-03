@@ -86,7 +86,7 @@ app.use('/books', async (req, res) => {
 
     console.log('Response from book-service:', response.data);
 
-    res.set(response.headers).status(response.status).json(response.data);
+    res.status(response.status).json(response.data);
   } catch (err) {
     if (err.response) {
       console.error('BFF error:', err.message);
